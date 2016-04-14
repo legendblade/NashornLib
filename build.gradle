@@ -1,0 +1,156 @@
+
+// For those who want the bleeding edge
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
+}
+
+repositories {
+    maven { url "http://maven.winterblade.org/content/repositories/minecraft/" }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'maven'
+
+version = "1.9.0-0.0.1"
+group= "org.winterblade.minecraft"
+archivesBaseName = "NashornLib"
+
+// java version
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    repo = "http://maven.winterblade.org/content/repositories/MinecraftDev/"
+}
+
+minecraft {
+    version = "1.9-12.16.0.1864-1.9"
+    runDir = "run"
+    mappings = "snapshot_20160312"
+    replace '@VERSION@', project.version
+}
+
+// Add "embedded" configuration
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+dependencies {
+    embed files('libs/nashorn.jar');
+}
+
+processResources
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+
+task getTCVersionInfo << {
+    def branch = System.getProperty("teamcity.build.branch", "")
+    def counter = System.getProperty("build.counter", "")
+    def hash = System.getProperty("build.vcs.number", "")
+    if(!branch.equals("")) branch = branch.equals("<default>") ? branch = "-develop" : "-" + branch
+    if(!hash.equals("")) hash = "-" + hash[0..7]
+    if(!counter.equals("")) counter = "." + counter
+
+    version = "${version}${counter}${branch}${hash}"
+}
+
+//noinspection GroovyAssignabilityCheck
+task printTCVersionInfo(dependsOn: 'getTCVersionInfo') << {
+    println("##teamcity[setParameter name='ProjectVersion' value='${version}']")
+    println("##teamcity[buildNumber '${version}']")
+}
+
+task artifactDeobf(type: Copy, dependsOn: ['jar']) {
+    outputs.upToDateWhen { false }
+    from 'build/libs/'
+    into 'build/libs/'
+    rename { String fileName ->
+        if(!fileName.endsWith('sources.jar')) fileName.replace('.jar','-deobf.jar')
+    }
+}
+
+task buildArtifacts(dependsOn: ['sourceJar','artifactDeobf','reobfJar'])
+
+uploadArchives {
+    if(project.hasProperty("release")) {
+        repo = "http://maven.winterblade.org/content/repositories/minecraft/"
+    }
+
+    repositories.mavenDeployer {
+        dependsOn 'reobfJar'
+
+        if(project.hasProperty('mavenPass')) {
+            repository(url: repo) {
+                authentication(userName: "minecraft", password: project.getProperty('mavenPass'))
+            }
+        }
+
+        pom {
+            groupId = project.group
+            version = "${version}" // So it gets processed after it's set from TC if it's a dev build
+            artifactId = project.archivesBaseName
+            project {
+                name project.archivesBaseName
+                packaging 'jar'
+                description ''
+                url 'https://github.com/legendblade/${archivesBaseName}'
+
+                scm {
+                    url 'https://github.com/legendblade/${archivesBaseName}'
+                    connection 'scm:git:git://github.com/legendblade/${archivesBaseName}.git'
+                    developerConnection 'scm:git:git@github.com:legendblade/${archivesBaseName}.git'
+                }
+
+                issueManagement {
+                    system 'github'
+                    url 'https://github.com/legendblade/${archivesBaseName}/issues'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'https://raw.githubusercontent.com/legendblade/${archivesBaseName}/master/LICENSE'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'legendblade'
+                        name 'Matt'
+                        roles { role 'developer' }
+                    }
+                }
+            }
+        }
+    }
+}
+
+idea { module { inheritOutputDirs = true } }

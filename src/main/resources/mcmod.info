@@ -1,0 +1,16 @@
+[
+{
+  "modid": "NashornLib",
+  "name": "Nashorn Library",
+  "description": "Java 8 Nashorn JavaScript script engine provider library.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["TarynWinterblade"],
+  "credits": "The Forge team for Forge and Java 8 for Nashorn",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

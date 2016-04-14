@@ -20,7 +20,7 @@ repositories {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
 
-version = "1.9.0-0.0.1"
+version = "1.9.0-1.8.77-0.0.1"
 group= "org.winterblade.minecraft"
 archivesBaseName = "NashornLib"
 

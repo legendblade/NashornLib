@@ -13,6 +13,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.matthewprenger.cursegradle" version "1.0.7"
+}
+
 repositories {
     maven { url "http://maven.winterblade.org/content/repositories/minecraft/" }
 }
@@ -159,3 +163,13 @@ uploadArchives {
 }
 
 idea { module { inheritOutputDirs = true } }
+
+curseforge {
+    apiKey = System.getProperty("CurseForgeKey", "")
+    project {
+        id = '244011'
+        changelog = file('changelog.html')
+        changelogType = 'html'
+        releaseType = project.hasProperty('releaseType') ? project.releaseType : 'alpha'
+    }
+}

@@ -20,7 +20,7 @@ repositories {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
 
-version = "1.9.0-1.8.77-1.0.0"
+version = "1.9.0-1.8.77-1.1.0"
 group= "org.winterblade.minecraft"
 archivesBaseName = "NashornLib"
 
@@ -47,6 +47,11 @@ configurations {
 
 dependencies {
     embed files('libs/nashorn.jar');
+}
+
+//Add dependencies to the JAR
+jar {
+    from configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 processResources

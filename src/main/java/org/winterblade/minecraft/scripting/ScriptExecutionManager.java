@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.logging.log4j.Logger;
+import org.winterblade.minecraft.scripting.api.IScriptContext;
 
 import javax.script.*;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class ScriptExecutionManager {
      *                              your script file.
      * @return                      The configured ScriptEngine.
      */
-    public static ScriptEngine getNewContext(Logger logger) {
+    public static IScriptContext getNewContext(Logger logger) {
         return getNewContext(logger, new String[0]);
     }
 
@@ -54,7 +55,7 @@ public class ScriptExecutionManager {
      *                              your class, you may leave this blank.
      * @return                      The configured ScriptEngine.
      */
-    public static ScriptEngine getNewContext(Logger logger, String[] allowedPackageRoots) {
+    public static IScriptContext getNewContext(Logger logger, String[] allowedPackageRoots) {
         // TODO: Suppress warnings
         ScriptEngine nashorn = instance.factory.getScriptEngine(new ScriptExecutionSandbox(allowedPackageRoots));
         final Bindings bindings = nashorn.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -79,7 +80,7 @@ public class ScriptExecutionManager {
         bindings.remove("load");
         bindings.remove("loadWithNewGlobal");
 
-        return nashorn;
+        return new NashornScriptContext(logger, nashorn);
     }
 
     private static class ScriptExecutionSandbox implements ClassFilter {

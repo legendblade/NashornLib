@@ -5,6 +5,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 import org.winterblade.minecraft.scripting.api.INashornMod;
+import org.winterblade.minecraft.scripting.internal.AnnotationUtil;
+import org.winterblade.minecraft.scripting.internal.ScriptObjectParser;
 
 import java.util.List;
 
@@ -16,11 +18,12 @@ public class NashornLibMod {
     public static final String MODID = "NashornLib";
     public static final String VERSION = "@VERSION@";
     private List<INashornMod> nashornMods;
-    private Logger logger;
+    static Logger logger;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent evt) {
-        nashornMods = AnnotatedInstanceUtil.getNashornMods(evt.getAsmData());
+        nashornMods = AnnotationUtil.getNashornMods(evt.getAsmData());
+        ScriptObjectParser.registerDeserializerClasses(AnnotationUtil.getScriptObjectDeserializers(evt.getAsmData()));
         logger = evt.getModLog();
     }
 

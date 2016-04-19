@@ -26,7 +26,7 @@ public class ScriptExecutionManager {
         try {
             headerTemp = Resources.toString(Resources.getResource("scripts/NashornLibHeader.js"), Charsets.UTF_8);
         } catch (IOException e) {
-            System.err.println("Unable to load file processing header; things will go badly from here out...");
+            NashornLibMod.logger.error("Unable to load file processing header; things will go badly from here out...", e);
             headerTemp = "";
         }
 
@@ -64,14 +64,14 @@ public class ScriptExecutionManager {
         try {
             nashorn.eval(instance.header);
         } catch (ScriptException e) {
-            System.err.println("Error processing script header file; please report this issue: " + e.getMessage());
+            NashornLibMod.logger.error("Error processing script header file; please report this issue.", e);
         }
 
         Invocable invocable = (Invocable) nashorn;
         try {
             invocable.invokeFunction("__nashornLibInternalConfigureLogger", logger);
         } catch (ScriptException | NoSuchMethodException e) {
-            System.err.println("Unable to configure logger: " + e.getMessage());
+            NashornLibMod.logger.error("Unable to configure logger", e);
         }
 
         // Remove most of our bindings; in testing, we don't have access to these anyway
@@ -94,6 +94,9 @@ public class ScriptExecutionManager {
         public boolean exposeToScripts(String s) {
             // Prevent scripts from using another SEM to gain access to more packages:
             if(s.equals("org.winterblade.minecraft.scripting.ScriptExecutionManager")) return false;
+
+            // Some internal classes we need to hook into:
+            if(s.equals("org.winterblade.minecraft.scripting.internal.JsonHelper")) return  true;
 
             // Figure out if we're in the allowed list:
             for(String allowedRoot : allowedPackageRoots) {

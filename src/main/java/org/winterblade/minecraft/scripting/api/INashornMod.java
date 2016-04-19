@@ -3,8 +3,10 @@ package org.winterblade.minecraft.scripting.api;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Created by Matt on 4/14/2016.
+ * Identifies that a particular class utilizes the Nashorn system; this class must have the @NashornMod attribute on it
+ * and have a default (parameterless) constructor.
  */
+
 public interface INashornMod {
     /**
      * Returns an instance of the logger for your mod

@@ -1,6 +1,9 @@
 var __nashornLibInternalImpl = function() {
     var ns = this;
 
+    ns.JsonHelper = Java.type('org.winterblade.minecraft.scripting.internal.JsonHelper');
+
+
     // We'll store our logger here later:
     var logger = null;
 
@@ -47,6 +50,15 @@ var __nashornLibInternalImpl = function() {
     ns.configureLogger = function(log) {
         logger = log;
     }
+
+    /*
+     * Used by our SEM to parse NBT into a Minecraft format.
+     */
+    ns.getJsonString = function(obj) {
+        return JSON.stringify(obj).replace(/\"([^(\")"]+)\":/g,"$1:");
+    }
+
+    ns.JsonHelper.registerCallback(ns.getJsonString);
 }
 
 __nashornLibInternal = new __nashornLibInternalImpl();

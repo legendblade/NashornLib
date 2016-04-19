@@ -1,8 +1,10 @@
 package org.winterblade.minecraft.scripting;
 
+import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.logging.log4j.Logger;
 import org.winterblade.minecraft.scripting.api.IScriptContext;
+import org.winterblade.minecraft.scripting.internal.JsonHelper;
 import org.winterblade.minecraft.scripting.internal.ScriptObjectParser;
 
 import javax.script.ScriptEngine;
@@ -52,5 +54,16 @@ public class NashornScriptContext implements IScriptContext {
     @Override
     public void parseScriptObject(ScriptObjectMirror data, Object writeTo) {
         ScriptObjectParser.writeScriptObjectToClass(data, writeTo, logger);
+    }
+
+    /**
+     * Parses the given JSON object into a JSON string.  Namely used to process NBT from JavaScript
+     *
+     * @param object The object to parse
+     * @return The stringified JSON object.
+     */
+    @Override
+    public String stringifyJsonObject(JSObject object) {
+        return JsonHelper.getJsonString(object, logger);
     }
 }

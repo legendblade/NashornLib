@@ -95,6 +95,9 @@ public class ScriptExecutionManager {
             // Prevent scripts from using another SEM to gain access to more packages:
             if(s.equals("org.winterblade.minecraft.scripting.ScriptExecutionManager")) return false;
 
+            // Some internal classes we need to hook into:
+            if(s.equals("org.winterblade.minecraft.scripting.internal.JsonHelper")) return  true;
+
             // Figure out if we're in the allowed list:
             for(String allowedRoot : allowedPackageRoots) {
                 if(s.startsWith(allowedRoot)) {

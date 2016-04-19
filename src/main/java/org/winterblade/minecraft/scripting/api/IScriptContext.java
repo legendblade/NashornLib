@@ -1,5 +1,6 @@
 package org.winterblade.minecraft.scripting.api;
 
+import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
@@ -27,4 +28,10 @@ public interface IScriptContext {
     void parseScriptObject(ScriptObjectMirror data, Object writeTo);
 
 
+    /**
+     * Parses the given JSON object into a JSON string.  Namely used to process NBT from JavaScript
+     * @param object    The object to parse
+     * @return          The stringified JSON object.
+     */
+    String stringifyJsonObject(JSObject object);
 }

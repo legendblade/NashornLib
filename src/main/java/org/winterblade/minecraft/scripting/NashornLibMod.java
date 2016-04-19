@@ -18,7 +18,7 @@ public class NashornLibMod {
     public static final String MODID = "NashornLib";
     public static final String VERSION = "@VERSION@";
     private List<INashornMod> nashornMods;
-    static Logger logger;
+    public static Logger logger;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent evt) {
@@ -36,7 +36,7 @@ public class NashornLibMod {
                                 mod.getLogger(),
                                 mod.getAllowedPackageRoots()));
             } catch(Exception ex) {
-                logger.error("Error creating script context for '" + mod.getClass().getName() + "'.");
+                logger.error("Error creating script context for '" + mod.getClass().getName() + "'.", ex);
             }
         }
     }

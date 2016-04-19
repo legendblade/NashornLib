@@ -40,7 +40,7 @@ public class NashornScriptContext implements IScriptContext {
      */
     @Override
     public <T> T convertData(Object input, Class<T> cls) {
-        return ScriptObjectParser.convertData(input, cls);
+        return ScriptObjectParser.convertData(input, cls, logger);
     }
 
     /**
@@ -51,6 +51,6 @@ public class NashornScriptContext implements IScriptContext {
      */
     @Override
     public void parseScriptObject(ScriptObjectMirror data, Object writeTo) {
-        ScriptObjectParser.writeScriptObjectToClass(data, writeTo);
+        ScriptObjectParser.writeScriptObjectToClass(data, writeTo, logger);
     }
 }

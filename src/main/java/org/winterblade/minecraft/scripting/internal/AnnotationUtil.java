@@ -1,8 +1,8 @@
 package org.winterblade.minecraft.scripting.internal;
 
-import jline.internal.Log;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import org.objectweb.asm.Type;
+import org.winterblade.minecraft.scripting.NashornLibMod;
 import org.winterblade.minecraft.scripting.api.INashornMod;
 import org.winterblade.minecraft.scripting.api.IScriptObjectDeserializer;
 import org.winterblade.minecraft.scripting.api.NashornMod;
@@ -37,7 +37,7 @@ public class AnnotationUtil {
                 T instance = asmInstanceClass.newInstance();
                 instances.add(instance);
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                Log.error("Failed to load: {}", asmData.getClassName(), e);
+                NashornLibMod.logger.error("Failed to load: {}", asmData.getClassName(), e);
             }
         }
         return instances;
@@ -57,7 +57,7 @@ public class AnnotationUtil {
                 Class<?> asmClass = Class.forName(asmData.getClassName());
 
                 if(!outputClass.isAssignableFrom(asmClass)) {
-                    System.err.println("Attempted to load '" + asmClass.getSimpleName() +
+                    NashornLibMod.logger.warn("Attempted to load '" + asmClass.getSimpleName() +
                             "', but it doesn't implement '" + outputClass.getSimpleName() + "'.");
                     continue;
                 }
@@ -70,14 +70,14 @@ public class AnnotationUtil {
                 }
 
                 if(name == null) {
-                    System.err.println("Attempted to load '" + asmClass.getSimpleName() +
+                    NashornLibMod.logger.warn("Attempted to load '" + asmClass.getSimpleName() +
                             "', couldn't find the ID parameter '" + idParam + "' on it.");
                     continue;
                 }
 
                 instances.put((Tk) name, (Class<T>) asmClass);
             } catch (ClassNotFoundException e) {
-                System.err.println("Failed to load: " + asmData.getClassName() + ".\n" + Arrays.toString(e.getStackTrace()));
+                NashornLibMod.logger.error("Failed to load: " + asmData.getClassName(), e);
             }
         }
         return instances;

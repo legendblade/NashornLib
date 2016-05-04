@@ -2,6 +2,7 @@ package org.winterblade.minecraft.scripting.internal;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
+import jdk.nashorn.internal.runtime.ScriptObject;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
 import org.winterblade.minecraft.scripting.NashornLibMod;
@@ -79,12 +80,45 @@ public class ScriptObjectParser {
             return (T)values;
         }
 
-        // If we don't have a deserializer, then try and convert it through the script utils...
         try {
-            if (!deserializerMap.containsKey(cls.getName())) return (T) ScriptUtils.convert(input, cls);
+            // If we have a deserializer, use it...
+            if (deserializerMap.containsKey(cls.getName())) {
+                IScriptObjectDeserializer deserializer = deserializerMap.get(cls.getName());
+                return (T) deserializer.Deserialize(input);
+            }
 
-            IScriptObjectDeserializer deserializer = deserializerMap.get(cls.getName());
-            return (T) deserializer.Deserialize(input);
+            // If we don't have an object, go ahead and try to convert it using script utils:
+            if(!ScriptObjectMirror.class.isAssignableFrom(input.getClass()) &&
+                    !ScriptObject.class.isAssignableFrom(input.getClass())) return (T) ScriptUtils.convert(input, cls);
+
+            // Otherwise, use some basic deserialization:
+            ScriptObjectMirror mirror;
+
+            // The first case will probably not happen, but, just in case...
+            if(ScriptObjectMirror.class.isAssignableFrom(input.getClass())) {
+                mirror = (ScriptObjectMirror) input;
+            } else {
+                mirror = ScriptUtils.wrap((ScriptObject) input);
+            }
+
+            // If we're actually a function, then allow Nashorn to deseralize us:
+            if(mirror.isFunction()) {
+                return (T) ScriptUtils.convert(input, cls);
+            }
+
+            // Now, really do basic deserialization:
+            T output = cls.newInstance();
+
+            for(Map.Entry<String, Object> entry : mirror.entrySet()) {
+                Field f = getFieldByName(cls, entry.getKey());
+
+                if(f == null) continue;
+
+                // Update our field utilizing conversions:
+                updateField(cls, entry.getKey(), output, entry.getValue(), logger);
+            }
+
+            return output;
         } catch(Exception e) {
             logger.warn("Error converting data to type '" + cls.getName(), e);
             return null;

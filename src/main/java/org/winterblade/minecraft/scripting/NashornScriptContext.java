@@ -7,6 +7,7 @@ import org.winterblade.minecraft.scripting.api.IScriptContext;
 import org.winterblade.minecraft.scripting.internal.JsonHelper;
 import org.winterblade.minecraft.scripting.internal.ScriptObjectParser;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
@@ -65,5 +66,18 @@ public class NashornScriptContext implements IScriptContext {
     @Override
     public String stringifyJsonObject(JSObject object) {
         return JsonHelper.getJsonString(object, logger);
+    }
+
+    /**
+     * Invoke a function inside your script context
+     * @param function                  The method to run
+     * @param args                      The arguments to pass to your method
+     * @return                          An object as the result of your method
+     * @throws ScriptException
+     * @throws NoSuchMethodException
+     */
+    @Override
+    public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
+        return ((Invocable)nashorn).invokeFunction(function, args);
     }
 }

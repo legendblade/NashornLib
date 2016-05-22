@@ -3,6 +3,8 @@ package org.winterblade.minecraft.scripting.api;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
+import javax.script.ScriptException;
+
 /**
  * Created by Matt on 4/14/2016.
  */
@@ -34,4 +36,14 @@ public interface IScriptContext {
      * @return          The stringified JSON object.
      */
     String stringifyJsonObject(JSObject object);
+
+    /**
+     * Invoke a function inside your script context
+     * @param function                  The method to run
+     * @param args                      The arguments to pass to your method
+     * @return                          An object as the result of your method
+     * @throws ScriptException
+     * @throws NoSuchMethodException
+     */
+    Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException;
 }

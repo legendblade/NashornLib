@@ -1,5 +1,6 @@
 package org.winterblade.minecraft.scripting.internal;
 
+import com.google.common.base.Defaults;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.ScriptObject;
@@ -64,6 +65,10 @@ public class ScriptObjectParser {
     public static <T> T convertData(Object input, Class<T> cls, Logger logger) {
         // If we have an array, this gets messy...
         if(cls.isArray()) {
+            if(ScriptObjectMirror.class.isAssignableFrom(input.getClass())) {
+                if(((ScriptObjectMirror)input).size() <= 0) return (T) Array.newInstance(cls.getComponentType(),0);
+            }
+
             Object[] items = (Object[]) ScriptUtils.convert(input, Object[].class);
 
             Class componentType = cls.getComponentType();
@@ -119,9 +124,9 @@ public class ScriptObjectParser {
             }
 
             return output;
-        } catch(Exception e) {
-            logger.warn("Error converting data to type '" + cls.getName(), e);
-            return null;
+        } catch(Throwable t) {
+            logger.warn("Error converting data to type '" + cls.getName(), t);
+            return Defaults.defaultValue(cls);
         }
     }
 

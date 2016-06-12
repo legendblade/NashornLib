@@ -65,13 +65,20 @@ public class ScriptObjectParser {
     public static <T> T convertData(Object input, Class<T> cls, Logger logger) {
         // If we have an array, this gets messy...
         if(cls.isArray()) {
-            if(ScriptObjectMirror.class.isAssignableFrom(input.getClass())) {
-                if(((ScriptObjectMirror)input).size() <= 0) return (T) Array.newInstance(cls.getComponentType(),0);
-            }
+            Class componentType = cls.getComponentType();
+
+            // We need a script object mirror for this; otherwise, just try and convert the single...
+            if(!ScriptObjectMirror.class.isAssignableFrom(input.getClass())) return wrapSingleton(input, logger, componentType);
+
+            ScriptObjectMirror mirror = (ScriptObjectMirror) input;
+            // This happens when we get undefined passed in, or we somehow have a function for an array?
+            // TODO: Consider if we want to allow functions, and be able to call them to get values?
+            if(mirror.size() <= 0 || mirror.isFunction()) return (T) Array.newInstance(cls.getComponentType(),0);
+
+            // If we're an object instead...
+            if(!mirror.isArray()) return wrapSingleton(input, logger, componentType);
 
             Object[] items = (Object[]) ScriptUtils.convert(input, Object[].class);
-
-            Class componentType = cls.getComponentType();
             Object[] values = (Object[]) Array.newInstance(componentType, items.length);
 
             for(int i = 0; i < items.length; i++) {
@@ -128,6 +135,20 @@ public class ScriptObjectParser {
             logger.warn("Error converting data to type '" + cls.getName(), t);
             return Defaults.defaultValue(cls);
         }
+    }
+
+    /**
+     * Wraps a singleton of an array
+     * @param input            The object to create
+     * @param logger           The logger to use
+     * @param componentType    The component's type
+     * @param <T>
+     * @return
+     */
+    private static <T> T wrapSingleton(Object input, Logger logger, Class componentType) {
+        Object[] values = (Object[]) Array.newInstance(componentType, 1);
+        values[0] = convertData(input, componentType, logger);
+        return (T) values;
     }
 
     /**

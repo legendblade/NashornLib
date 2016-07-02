@@ -9,8 +9,13 @@ import javax.script.ScriptException;
  * Created by Matt on 4/14/2016.
  */
 public interface IScriptContext {
-
-    boolean eval(String script);
+    /**
+     * Evaluate the given script
+     * @param script    The script to evaluate
+     * @return  True if execution succeeded.
+     * @throws ScriptException  If any script errors were encountered.
+     */
+    boolean eval(String script) throws ScriptException;
 
     /**
      * Converts a JavaScript object into the given type using IScriptObjectDeserializers.

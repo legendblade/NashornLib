@@ -171,5 +171,8 @@ curseforge {
         changelog = file('changelog.html')
         changelogType = 'html'
         releaseType = project.hasProperty('releaseType') ? project.releaseType : 'alpha'
+        addGameVersion '1.9.4'
+        addGameVersion '1.10'
+        addGameVersion '1.10.2'
     }
 }

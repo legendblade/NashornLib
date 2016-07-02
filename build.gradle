@@ -24,7 +24,7 @@ repositories {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
 
-version = "1.9.4-1.8.77-1.3.0"
+version = "1.9.4-1.8.77-1.3.1"
 group= "org.winterblade.minecraft"
 archivesBaseName = "NashornLib"
 
@@ -171,5 +171,8 @@ curseforge {
         changelog = file('changelog.html')
         changelogType = 'html'
         releaseType = project.hasProperty('releaseType') ? project.releaseType : 'alpha'
+        addGameVersion '1.9.4'
+        addGameVersion '1.10'
+        addGameVersion '1.10.2'
     }
 }

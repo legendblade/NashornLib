@@ -1,5 +1,6 @@
 package org.winterblade.minecraft.scripting.internal;
 
+import com.google.common.base.Defaults;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import jdk.nashorn.internal.runtime.ScriptObject;
@@ -64,9 +65,20 @@ public class ScriptObjectParser {
     public static <T> T convertData(Object input, Class<T> cls, Logger logger) {
         // If we have an array, this gets messy...
         if(cls.isArray()) {
-            Object[] items = (Object[]) ScriptUtils.convert(input, Object[].class);
-
             Class componentType = cls.getComponentType();
+
+            // We need a script object mirror for this; otherwise, just try and convert the single...
+            if(!ScriptObjectMirror.class.isAssignableFrom(input.getClass())) return wrapSingleton(input, logger, componentType);
+
+            ScriptObjectMirror mirror = (ScriptObjectMirror) input;
+            // This happens when we get undefined passed in, or we somehow have a function for an array?
+            // TODO: Consider if we want to allow functions, and be able to call them to get values?
+            if(mirror.size() <= 0 || mirror.isFunction()) return (T) Array.newInstance(cls.getComponentType(),0);
+
+            // If we're an object instead...
+            if(!mirror.isArray()) return wrapSingleton(input, logger, componentType);
+
+            Object[] items = (Object[]) ScriptUtils.convert(input, Object[].class);
             Object[] values = (Object[]) Array.newInstance(componentType, items.length);
 
             for(int i = 0; i < items.length; i++) {
@@ -119,10 +131,24 @@ public class ScriptObjectParser {
             }
 
             return output;
-        } catch(Exception e) {
-            logger.warn("Error converting data to type '" + cls.getName(), e);
-            return null;
+        } catch(Throwable t) {
+            logger.warn("Error converting data to type '" + cls.getName(), t);
+            return Defaults.defaultValue(cls);
         }
+    }
+
+    /**
+     * Wraps a singleton of an array
+     * @param input            The object to create
+     * @param logger           The logger to use
+     * @param componentType    The component's type
+     * @param <T>
+     * @return
+     */
+    private static <T> T wrapSingleton(Object input, Logger logger, Class componentType) {
+        Object[] values = (Object[]) Array.newInstance(componentType, 1);
+        values[0] = convertData(input, componentType, logger);
+        return (T) values;
     }
 
     /**

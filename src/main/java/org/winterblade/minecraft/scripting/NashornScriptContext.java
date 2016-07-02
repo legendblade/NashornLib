@@ -24,13 +24,8 @@ public class NashornScriptContext implements IScriptContext {
     }
 
     @Override
-    public boolean eval(String script) {
-        try {
-            nashorn.eval(script);
-        } catch (ScriptException e) {
-            logger.error("Error evaluating script file.", e);
-            return false;
-        }
+    public boolean eval(String script) throws ScriptException {
+        nashorn.eval(script);
         return true;
     }
 
